@@ -68,10 +68,15 @@ def star_wars_intro(screen, text_lines, width, height):
     pygame.mixer.music.stop()
 
 
-def draw_text(surface, text, size, x, y, color=(255, 255, 255)):
+def draw_text(surface, text, size, x, y, color=(255, 255, 255), align='center'):
     font = pygame.font.Font("../assets/PixelifySans-VariableFont_wght.ttf", size)
     text_surface = font.render(text, True, color)
-    rect = text_surface.get_rect(center=(x, y))
+    if align == 'center':
+        rect = text_surface.get_rect(center=(x, y))
+    elif align == 'topleft':
+        rect = text_surface.get_rect(topleft=(x,y))
+    elif align == 'topright':
+        rect = text_surface.get_rect(topright=(x,y))
     surface.blit(text_surface, rect)
 
 
@@ -79,8 +84,17 @@ def menu(screen, logo_img):
     pygame.mixer.init()
     pygame.mixer.music.load("../assets/csgo_music.wav")
     pygame.mixer.music.play(-1)
+
+    volume = 0.5
+    muted = False
+    volume_icon = pygame.image.load("../assets/enemy_1.jpg").convert_alpha()
+    volume_icon_muted = pygame.image.load("../assets/enemy_4.jpg").convert_alpha()
+    volume_icon = pygame.transform.scale(volume_icon, (40,40))
+    volume_icon_muted = pygame.transform.scale(volume_icon_muted, (40,40))
+
+
     screen.fill((200, 0, 0))
-    options = ["Start", "Instrukcja", "Wczytaj zapis", "Wyjście"]
+    options = ["Start", "Instrukcja", "Historia wyników", "Wyjście"]
     selected = 0
     clock = pygame.time.Clock()
 
@@ -92,6 +106,12 @@ def menu(screen, logo_img):
         for i, option in enumerate(options):
             color = (255, 255, 0) if i == selected else (255, 255, 255)
             draw_text(screen, option, 32, width // 2, 300 + i * 50, color)
+
+        icon_pos = (width - 50, height - 50)
+        if muted:
+            screen.blit(volume_icon_muted, icon_pos)
+        else:
+            screen.blit(volume_icon, icon_pos)
 
         pygame.display.flip()
         clock.tick(15)
@@ -112,10 +132,15 @@ def menu(screen, logo_img):
                         screen.fill((200, 0, 0))
                         pygame.display.flip()
                     elif selected == 2:
-                        return "load"
+                        return show_score_history(screen)
                     elif selected == 3:
                         return EXIT
-
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = event.pos
+                ix, iy = icon_pos
+                if ix <= mx <= ix + 40 and iy <= my <= iy + 40:
+                    muted = not muted
+                    pygame.mixer.music.set_volume(0 if muted else volume)
 
 def instructions(screen):
     screen.fill((200, 0, 0))
@@ -125,9 +150,7 @@ def instructions(screen):
     draw_text(screen, "Strzelanie - lewy przycisk myszki", 32, width // 2, 300)
     draw_text(screen, "[P] - pauza", 32, width // 2, 350)
     draw_text(screen, "[ESC] - powrót do menu głównego]", 32, width // 2, 400)
-    draw_text(
-        screen, "Gra zapisuje się automatycznie przy wyjściu.", 32, width // 2, 450
-    )
+    draw_text(screen, "[R] - zrestartuj grę", 32, width // 2, 450)
 
     pygame.display.flip()
 
@@ -140,6 +163,80 @@ def instructions(screen):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return
 
+def show_score_history(screen):
+    screen.fill((200, 0, 0))
+    draw_text(screen, "Historia wyników", 40, width // 2, 50)
+    scores = []
+    with open("scores.txt", "r") as f:
+        for line in f:
+            line = line.strip()
+            if line.isdigit():
+                scores.append(int(line))
+
+    if scores:
+        top_score = max(scores)
+        draw_text(screen, f"Top score: {top_score}", 32, width // 2, 120, (255, 255, 0))
+        draw_text(screen, "Ostatnie 10 wyników:", 28, width // 2, 170)
+
+        last_scores = scores[-10:]  # 10 ostatnich
+        last_scores.reverse()  # od najnowszego do najstarszego
+        for i, score in enumerate(last_scores):
+            draw_text(screen, f"{i + 1}. {score}", 24, width // 2, 210 + i * 30)
+    else:
+        draw_text(screen, "Brak zapisanych wyników.", 28, width // 2, 150)
+
+    draw_text(screen, "Naciśnij [ESC], aby wrócić do menu", 24, width // 2, height - 50)
+
+    pygame.display.flip()
+
+    wait = True
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                wait = False
+def pause_menu(screen):
+    background = screen.copy()
+    overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+    overlay.fill((0,0,0,120))
+    screen.blit(background, (0,0))
+    screen.blit(overlay, (0,0))
+    draw_text(screen, "PAUZA", 64, width // 2, height // 2 - 50)
+    draw_text(screen, "Wciśnij [P], aby wrócić do gry", 32, width // 2, height // 2 + 20)
+    pygame.display.flip()
+
+    wait = True
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                return
+def game_over(screen, score):
+    screen.fill((200, 0, 0))
+    draw_text(screen,"Koniec gry!", 64, width // 2, height // 2 - 50, (255,255,255))
+    draw_text(screen,f"Twój wynik: {score}", 32, width // 2, height // 2+10, (255,255,255))
+    draw_text(screen, "Naciśnij [R], by zrestartować grę", 32, width // 2, height // 2 + 50, (255, 255, 255))
+    draw_text(screen,"Naciśnij [ESC], żeby powrócić do menu", 24, width // 2, height // 2 + 80, (255,255,255))
+
+    with open("scores.txt", "a") as f:
+        f.write(f"{score}\n")
+
+    pygame.display.flip()
+
+    wait = True
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return
+            elif event.type == pygame.KEYDOWN and event.key==pygame.K_r:
+                return "restart"
 
 def spawn_enemy(x, y, wave):
     weights = {
@@ -164,10 +261,11 @@ def run_game(screen):
 
     pygame.mouse.set_visible(False)
 
-    wave = 1
+    wave = 0
     spawn_timer = 0
     spawn_interval = 5000
     invulnerability_timer = 0
+    score = 0
 
     run = True
     while run:
@@ -183,6 +281,10 @@ def run_game(screen):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     run = False
+                elif event.key == pygame.K_p:
+                    pause_menu(screen)
+                elif event.key == pygame.K_r:
+                    return run_game(screen)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = pygame.mouse.get_pos()
                 shooting = Shooting(bear.rect.centerx, bear.rect.centery, mx, my)
@@ -223,6 +325,7 @@ def run_game(screen):
                 enemy.hp -= 1
                 shot.kill()
                 if enemy.hp <= 0:
+                    score += enemy.points
                     enemy.kill()
 
         damage_enemies = pygame.sprite.spritecollide(bear, enemies, False)
@@ -231,10 +334,16 @@ def run_game(screen):
                 bear.hp -= enemy.damage
                 invulnerability_timer = 1000
                 if bear.hp <= 0:
-                    run = False
+                    result = game_over(screen, score)
+                    if result == "restart":
+                        run_game(screen)
+                    else:
+                        return
 
         screen.fill((0, 0, 0))
-
+        draw_text(screen, f"Punkty życia : {bear.hp}", 20, 10, 10, (255,255,255),'topleft')
+        draw_text(screen, f"Highscore: {score}", 20, width-10, 10, (255,255,255), 'topright')
+        draw_text(screen, f"Fala: {wave}", 20, width // 2, 10, (255, 255, 255), 'center')
         all_sprites.draw(screen)
         enemies.draw(screen)
         shots.draw(screen)

@@ -12,6 +12,7 @@ class Enemy(pygame.sprite.Sprite):
         self.speed = params["speed"]
         self.hp = params["hp"]
         self.damage = params["damage"]
+        self.points = params["points"]
 
     def update(self, enemy):
         dx, dy = (

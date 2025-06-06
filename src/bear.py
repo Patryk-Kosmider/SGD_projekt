@@ -10,7 +10,7 @@ class Bear(pygame.sprite.Sprite):
         super().__init__()
         image = "../assets/bear_in.png"
         raw_image = pygame.image.load(image).convert_alpha()
-        self.image = pygame.transform.scale(raw_image, (64, 64))
+        self.image = pygame.transform.scale(raw_image, (128, 128))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = config.getint("bear", "speed")
         self.hp = 10
