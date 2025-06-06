@@ -13,6 +13,7 @@ class Bear(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(raw_image, (64, 64))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = config.getint("bear", "speed")
+        self.hp = 10
 
     def move(self, keys):
         if keys[pygame.K_w] or keys[pygame.K_UP]:
