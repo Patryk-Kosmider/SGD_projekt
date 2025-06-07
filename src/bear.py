@@ -1,8 +1,4 @@
 import pygame
-import configparser
-
-config = configparser.ConfigParser()
-config.read("config.ini")
 
 
 class Bear(pygame.sprite.Sprite):
@@ -12,8 +8,12 @@ class Bear(pygame.sprite.Sprite):
         raw_image = pygame.image.load(image).convert_alpha()
         self.image = pygame.transform.scale(raw_image, (128, 128))
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed = config.getint("bear", "speed")
+        self.speed = 7
         self.hp = 10
+        self.triple_shot = False
+        self.invincible = False
+        self.double_damage = False
+        self.active_powerups = []
 
     def move(self, keys):
         if keys[pygame.K_w] or keys[pygame.K_UP]:

@@ -16,7 +16,7 @@ class EnemyType(enum.Enum):
         "speed": 1.2,
         "hp": 2,
         "damage": 1,
-        "points": 15
+        "points": 15,
     }
 
     ENEMY3 = {
@@ -24,7 +24,7 @@ class EnemyType(enum.Enum):
         "speed": 1,
         "hp": 3,
         "damage": 2,
-        "points": 30
+        "points": 30,
     }
 
     ENEMY4 = {
@@ -32,5 +32,5 @@ class EnemyType(enum.Enum):
         "speed": 0.5,
         "hp": 5,
         "damage": 3,
-        "points": 60
+        "points": 60,
     }

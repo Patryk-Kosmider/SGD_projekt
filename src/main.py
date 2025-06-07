@@ -7,6 +7,8 @@ from shooting import Shooting
 from src.crosshair import Crosshair
 from src.enemy import Enemy
 from src.enemyType import EnemyType
+from src.powerUp import PowerUp
+from src.powerUpType import PowerType
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -68,15 +70,15 @@ def star_wars_intro(screen, text_lines, width, height):
     pygame.mixer.music.stop()
 
 
-def draw_text(surface, text, size, x, y, color=(255, 255, 255), align='center'):
+def draw_text(surface, text, size, x, y, color=(255, 255, 255), align="center"):
     font = pygame.font.Font("../assets/PixelifySans-VariableFont_wght.ttf", size)
     text_surface = font.render(text, True, color)
-    if align == 'center':
+    if align == "center":
         rect = text_surface.get_rect(center=(x, y))
-    elif align == 'topleft':
-        rect = text_surface.get_rect(topleft=(x,y))
-    elif align == 'topright':
-        rect = text_surface.get_rect(topright=(x,y))
+    elif align == "topleft":
+        rect = text_surface.get_rect(topleft=(x, y))
+    elif align == "topright":
+        rect = text_surface.get_rect(topright=(x, y))
     surface.blit(text_surface, rect)
 
 
@@ -89,9 +91,8 @@ def menu(screen, logo_img):
     muted = False
     volume_icon = pygame.image.load("../assets/enemy_1.jpg").convert_alpha()
     volume_icon_muted = pygame.image.load("../assets/enemy_4.jpg").convert_alpha()
-    volume_icon = pygame.transform.scale(volume_icon, (40,40))
-    volume_icon_muted = pygame.transform.scale(volume_icon_muted, (40,40))
-
+    volume_icon = pygame.transform.scale(volume_icon, (40, 40))
+    volume_icon_muted = pygame.transform.scale(volume_icon_muted, (40, 40))
 
     screen.fill((200, 0, 0))
     options = ["Start", "Instrukcja", "Historia wyników", "Wyjście"]
@@ -142,6 +143,7 @@ def menu(screen, logo_img):
                     muted = not muted
                     pygame.mixer.music.set_volume(0 if muted else volume)
 
+
 def instructions(screen):
     screen.fill((200, 0, 0))
     draw_text(screen, "Instrukcja:", 32, width // 2, 100)
@@ -162,6 +164,7 @@ def instructions(screen):
                 sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return
+
 
 def show_score_history(screen):
     screen.fill((200, 0, 0))
@@ -197,14 +200,18 @@ def show_score_history(screen):
                 sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 wait = False
+
+
 def pause_menu(screen):
     background = screen.copy()
     overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-    overlay.fill((0,0,0,120))
-    screen.blit(background, (0,0))
-    screen.blit(overlay, (0,0))
+    overlay.fill((0, 0, 0, 120))
+    screen.blit(background, (0, 0))
+    screen.blit(overlay, (0, 0))
     draw_text(screen, "PAUZA", 64, width // 2, height // 2 - 50)
-    draw_text(screen, "Wciśnij [P], aby wrócić do gry", 32, width // 2, height // 2 + 20)
+    draw_text(
+        screen, "Wciśnij [P], aby wrócić do gry", 32, width // 2, height // 2 + 20
+    )
     pygame.display.flip()
 
     wait = True
@@ -215,12 +222,35 @@ def pause_menu(screen):
                 sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return
+
+
 def game_over(screen, score):
     screen.fill((200, 0, 0))
-    draw_text(screen,"Koniec gry!", 64, width // 2, height // 2 - 50, (255,255,255))
-    draw_text(screen,f"Twój wynik: {score}", 32, width // 2, height // 2+10, (255,255,255))
-    draw_text(screen, "Naciśnij [R], by zrestartować grę", 32, width // 2, height // 2 + 50, (255, 255, 255))
-    draw_text(screen,"Naciśnij [ESC], żeby powrócić do menu", 24, width // 2, height // 2 + 80, (255,255,255))
+    draw_text(screen, "Koniec gry!", 64, width // 2, height // 2 - 50, (255, 255, 255))
+    draw_text(
+        screen,
+        f"Twój wynik: {score}",
+        32,
+        width // 2,
+        height // 2 + 10,
+        (255, 255, 255),
+    )
+    draw_text(
+        screen,
+        "Naciśnij [R], by zrestartować grę",
+        32,
+        width // 2,
+        height // 2 + 50,
+        (255, 255, 255),
+    )
+    draw_text(
+        screen,
+        "Naciśnij [ESC], żeby powrócić do menu",
+        24,
+        width // 2,
+        height // 2 + 80,
+        (255, 255, 255),
+    )
 
     with open("scores.txt", "a") as f:
         f.write(f"{score}\n")
@@ -235,8 +265,9 @@ def game_over(screen, score):
                 sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return
-            elif event.type == pygame.KEYDOWN and event.key==pygame.K_r:
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 return "restart"
+
 
 def spawn_enemy(x, y, wave):
     weights = {
@@ -251,14 +282,57 @@ def spawn_enemy(x, y, wave):
     return Enemy(x, y, enemy_type)
 
 
+def spawn_powerup(x, y, enemy, wave, powerups):
+    kill_bonus = {
+        1: 1.0,
+        2: 1.2,
+        3: 1.5,
+        4: 2.0,
+    }
+
+    enemy_lvl = int(enemy.type.name[-1])
+    multiplier = kill_bonus.get(enemy_lvl)
+
+    wave_bonus = 1 + (wave * 0.03)
+
+    for powertype in PowerType:
+        chances = powertype.value["base_chance"] * multiplier * wave_bonus
+        if random.random() < chances:
+            powerup = PowerUp(x, y, powertype)
+            powerups.add(powerup)
+
+
+def powerup_effect(bear, powertype):
+    if powertype == PowerType.TRIPLE_SHOT:
+        bear.triple_shot = True
+        pygame.time.set_timer(pygame.USEREVENT + 1, powertype.value["duration"])
+        if powertype not in bear.active_powerups:
+            bear.active_powerups.append(powertype)
+    elif powertype == PowerType.INVINCIBLE:
+        bear.invincible = True
+        pygame.time.set_timer(pygame.USEREVENT + 2, powertype.value["duration"])
+        if powertype not in bear.active_powerups:
+            bear.active_powerups.append(powertype)
+    elif powertype == PowerType.DOUBLE_DAMAGE:
+        bear.double_damage = True
+        pygame.time.set_timer(pygame.USEREVENT + 3, powertype.value["duration"])
+        if powertype not in bear.active_powerups:
+            bear.active_powerups.append(powertype)
+    elif powertype == PowerType.HEAL:
+        bear.hp += 2
+        if bear.hp > 10:
+            bear.hp = 10
+
+
 def run_game(screen):
     clock = pygame.time.Clock()
     bear = Bear(width // 2, height // 2)
     all_sprites = pygame.sprite.Group(bear)
     shots = pygame.sprite.Group()
-    crosshair = Crosshair()
     enemies = pygame.sprite.Group()
+    powerups = pygame.sprite.Group()
 
+    crosshair = Crosshair()
     pygame.mouse.set_visible(False)
 
     wave = 0
@@ -287,8 +361,36 @@ def run_game(screen):
                     return run_game(screen)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = pygame.mouse.get_pos()
-                shooting = Shooting(bear.rect.centerx, bear.rect.centery, mx, my)
-                shots.add(shooting)
+                if bear.triple_shot:
+                    offsets = [-0.2, 0.0, 0.2]
+                    for offset in offsets:
+                        shooting = Shooting(
+                            bear.rect.centerx,
+                            bear.rect.centery,
+                            mx,
+                            my,
+                            angle_offset=offset,
+                        )
+                        shots.add(shooting)
+                else:
+                    shooting = Shooting(bear.rect.centerx, bear.rect.centery, mx, my)
+                    shots.add(shooting)
+
+            elif event.type == pygame.USEREVENT + 1:
+                bear.triple_shot = False
+                pygame.time.set_timer(pygame.USEREVENT + 1, 0)
+                if PowerType.TRIPLE_SHOT in bear.active_powerups:
+                    bear.active_powerups.remove(PowerType.TRIPLE_SHOT)
+            elif event.type == pygame.USEREVENT + 2:
+                bear.invincible = False
+                pygame.time.set_timer(pygame.USEREVENT + 2, 0)
+                if PowerType.INVINCIBLE in bear.active_powerups:
+                    bear.active_powerups.remove(PowerType.INVINCIBLE)
+            elif event.type == pygame.USEREVENT + 3:
+                bear.double_damage = False
+                pygame.time.set_timer(pygame.USEREVENT + 3, 0)
+                if PowerType.DOUBLE_DAMAGE in bear.active_powerups:
+                    bear.active_powerups.remove(PowerType.DOUBLE_DAMAGE)
 
         keys = pygame.key.get_pressed()
         bear.move(keys)
@@ -318,19 +420,28 @@ def run_game(screen):
 
         enemies.update(bear)
         shots.update()
+        powerups.update()
+
+        collected = pygame.sprite.spritecollide(bear, powerups, True)
+        for powerup in collected:
+            powerup_effect(bear, powerup.type)
 
         for shot in shots:
             hit_enemies = pygame.sprite.spritecollide(shot, enemies, False)
             for enemy in hit_enemies:
-                enemy.hp -= 1
+                damage = 2 if bear.double_damage else 1
+                enemy.hp -= damage
                 shot.kill()
                 if enemy.hp <= 0:
                     score += enemy.points
                     enemy.kill()
+                    spawn_powerup(
+                        enemy.rect.centerx, enemy.rect.centery, enemy, wave, powerups
+                    )
 
         damage_enemies = pygame.sprite.spritecollide(bear, enemies, False)
         for enemy in damage_enemies:
-            if invulnerability_timer <= 0:
+            if invulnerability_timer <= 0 and not bear.invincible:
                 bear.hp -= enemy.damage
                 invulnerability_timer = 1000
                 if bear.hp <= 0:
@@ -341,14 +452,36 @@ def run_game(screen):
                         return
 
         screen.fill((0, 0, 0))
-        draw_text(screen, f"Punkty życia : {bear.hp}", 20, 10, 10, (255,255,255),'topleft')
-        draw_text(screen, f"Highscore: {score}", 20, width-10, 10, (255,255,255), 'topright')
-        draw_text(screen, f"Fala: {wave}", 20, width // 2, 10, (255, 255, 255), 'center')
+        draw_text(
+            screen, f"Punkty życia : {bear.hp}", 20, 10, 10, (255, 255, 255), "topleft"
+        )
+        draw_text(
+            screen,
+            f"Highscore: {score}",
+            20,
+            width - 10,
+            10,
+            (255, 255, 255),
+            "topright",
+        )
+        draw_text(
+            screen, f"Fala: {wave}", 20, width // 2, 10, (255, 255, 255), "center"
+        )
+
+        icon_x = 10
+        icon_y = 40
+        for powertype in bear.active_powerups:
+            img = pygame.image.load(powertype.value["image"]).convert_alpha()
+            img = pygame.transform.scale(img, (32, 32))
+            screen.blit(img, (icon_x, icon_y))
+            icon_x += 40
+
         all_sprites.draw(screen)
         enemies.draw(screen)
         shots.draw(screen)
         crosshair.update()
         crosshair.draw(screen)
+        powerups.draw(screen)
 
         pygame.display.flip()
 

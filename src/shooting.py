@@ -4,17 +4,25 @@ import pygame
 
 
 class Shooting(pygame.sprite.Sprite):
-    def __init__(self, x, y, target_x, target_y):
+    def __init__(self, x, y, target_x, target_y, angle_offset=0):
         super().__init__()
-        self.image = pygame.Surface((10, 6))
-        self.image.fill((255, 50, 50))
-        self.rect = self.image.get_rect(center=(x, y))
+        self.og_image = pygame.Surface((10, 6), pygame.SRCALPHA)
+        self.og_image.fill((255, 50, 50))
+
         dx = target_x - x
         dy = target_y - y
-        dist = math.sqrt(dx * dx + dy * dy)
-        if dist == 0:
-            dist = 1
-        self.velocity = (dx / dist * 10, dy / dist * 10)
+        base_angle = math.atan2(dy, dx)
+
+        angle_with_offset = base_angle + angle_offset
+
+        vel_x = math.cos(angle_with_offset) * 10
+        vel_y = math.sin(angle_with_offset) * 10
+        self.velocity = (vel_x, vel_y)
+
+        # Obrót sprite'a
+        rot_angle = -math.degrees(angle_with_offset)
+        self.image = pygame.transform.rotate(self.og_image, rot_angle)
+        self.rect = self.image.get_rect(center=(x, y))
 
     def update(self):
         self.rect.x += self.velocity[0]
