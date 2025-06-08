@@ -9,7 +9,7 @@ class Bear(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(raw_image, (128, 128))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 7
-        self.hp = 10
+        self.hp = 3
         self.triple_shot = False
         self.invincible = False
         self.double_damage = False

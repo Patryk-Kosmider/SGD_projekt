@@ -4,7 +4,7 @@ import enum
 class EnemyType(enum.Enum):
 
     ENEMY1 = {
-        "image": "../assets/enemy_1.jpg",
+        "image": "../assets/enemy_1.png",
         "speed": 1.5,
         "hp": 1,
         "damage": 1,
@@ -12,7 +12,7 @@ class EnemyType(enum.Enum):
     }
 
     ENEMY2 = {
-        "image": "../assets/enemy_2.jpg",
+        "image": "../assets/enemy_2.png",
         "speed": 1.2,
         "hp": 2,
         "damage": 1,
@@ -28,7 +28,7 @@ class EnemyType(enum.Enum):
     }
 
     ENEMY4 = {
-        "image": "../assets/enemy_4.jpg",
+        "image": "../assets/enemy_4.png",
         "speed": 0.5,
         "hp": 5,
         "damage": 3,

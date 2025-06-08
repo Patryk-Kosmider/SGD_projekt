@@ -26,7 +26,7 @@ def star_wars_intro(screen, text_lines, width, height):
     pygame.mixer.init()
     pygame.mixer.music.load("../assets/starwars_music.wav")
     pygame.mixer.music.play(-1)
-
+    pygame.mixer.music.set_volume(0.1)
     bear_img = pygame.image.load("../assets/bear.png").convert_alpha()
     bear_img = pygame.transform.scale(bear_img, (150, 150))
 
@@ -181,8 +181,8 @@ def show_score_history(screen):
         draw_text(screen, f"Top score: {top_score}", 32, width // 2, 120, (255, 255, 0))
         draw_text(screen, "Ostatnie 10 wyników:", 28, width // 2, 170)
 
-        last_scores = scores[-10:]  # 10 ostatnich
-        last_scores.reverse()  # od najnowszego do najstarszego
+        last_scores = scores[-10:]
+        last_scores.reverse()
         for i, score in enumerate(last_scores):
             draw_text(screen, f"{i + 1}. {score}", 24, width // 2, 210 + i * 30)
     else:
@@ -319,12 +319,14 @@ def powerup_effect(bear, powertype):
         if powertype not in bear.active_powerups:
             bear.active_powerups.append(powertype)
     elif powertype == PowerType.HEAL:
-        bear.hp += 2
-        if bear.hp > 10:
-            bear.hp = 10
+        bear.hp += 1
+        if bear.hp > 3:
+            bear.hp = 3
 
 
 def run_game(screen):
+    background_img = pygame.image.load("../assets/map.png")
+    background_img = pygame.transform.scale(background_img, (width, height))
     clock = pygame.time.Clock()
     bear = Bear(width // 2, height // 2)
     all_sprites = pygame.sprite.Group(bear)
@@ -451,7 +453,7 @@ def run_game(screen):
                     else:
                         return
 
-        screen.fill((0, 0, 0))
+        screen.blit(background_img, (0,0))
         draw_text(
             screen, f"Punkty życia : {bear.hp}", 20, 10, 10, (255, 255, 255), "topleft"
         )
