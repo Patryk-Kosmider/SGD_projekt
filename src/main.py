@@ -89,8 +89,8 @@ def menu(screen, logo_img):
 
     volume = 0.5
     muted = False
-    volume_icon = pygame.image.load("../assets/enemy_1.jpg").convert_alpha()
-    volume_icon_muted = pygame.image.load("../assets/enemy_4.jpg").convert_alpha()
+    volume_icon = pygame.image.load("../assets/sound.png").convert_alpha()
+    volume_icon_muted = pygame.image.load("../assets/mute_sound.png").convert_alpha()
     volume_icon = pygame.transform.scale(volume_icon, (40, 40))
     volume_icon_muted = pygame.transform.scale(volume_icon_muted, (40, 40))
 

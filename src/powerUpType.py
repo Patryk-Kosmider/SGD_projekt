@@ -4,24 +4,24 @@ import enum
 class PowerType(enum.Enum):
 
     TRIPLE_SHOT = {
-        "image": "../assets/enemy_1.jpg",
+        "image": "../assets/3xshoot.png",
         "duration": 10000,
         "instant": False,
         "base_chance": 0.05,
     }
 
     INVINCIBLE = {
-        "image": "../assets/enemy_2.jpg",
+        "image": "../assets/invincible.jpg",
         "duration": 5000,
         "instant": False,
         "base_chance": 0.01,
     }
 
     DOUBLE_DAMAGE = {
-        "image": "../assets/enemy_3.png",
+        "image": "../assets/2xdmg.png",
         "duration": 8000,
         "instant": False,
         "base_chance": 0.05,
     }
 
-    HEAL = {"image": "../assets/enemy_4.jpg", "instant": True, "base_chance": 0.07}
+    HEAL = {"image": "../assets/heal.png", "instant": True, "base_chance": 0.07}
