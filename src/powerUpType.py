@@ -11,7 +11,7 @@ class PowerType(enum.Enum):
     }
 
     INVINCIBLE = {
-        "image": "../assets/invincible.jpg",
+        "image": "../assets/invincible.png",
         "duration": 5000,
         "instant": False,
         "base_chance": 0.01,

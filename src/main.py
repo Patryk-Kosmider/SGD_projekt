@@ -94,13 +94,14 @@ def menu(screen, logo_img):
     volume_icon = pygame.transform.scale(volume_icon, (40, 40))
     volume_icon_muted = pygame.transform.scale(volume_icon_muted, (40, 40))
 
-    screen.fill((200, 0, 0))
+    pygame.mouse.set_visible(True)
+
     options = ["Start", "Instrukcja", "Historia wyników", "Wyjście"]
     selected = 0
     clock = pygame.time.Clock()
 
     while True:
-
+        screen.fill((200, 0, 0))
         logo_rect = logo_img.get_rect(center=(width // 2, 150))
         screen.blit(logo_img, logo_rect)
 
@@ -121,9 +122,9 @@ def menu(screen, logo_img):
             if event.type == pygame.QUIT:
                 return EXIT
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
                     selected = (selected - 1) % len(options)
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                     selected = (selected + 1) % len(options)
                 elif event.key == pygame.K_RETURN:
                     if selected == 0:
@@ -325,8 +326,17 @@ def powerup_effect(bear, powertype):
 
 
 def run_game(screen):
+    pygame.mixer.init()
     background_img = pygame.image.load("../assets/map.png")
     background_img = pygame.transform.scale(background_img, (width, height))
+
+    bear_hit_sound = pygame.mixer.Sound("../assets/dmg.wav")
+    bear_hit_sound.set_volume(0.1)
+    powerup_pick_sound = pygame.mixer.Sound("../assets/powerup_pick.wav")
+    powerup_pick_sound.set_volume(0.3)
+    enemy_hit_sound = pygame.mixer.Sound("../assets/enemy_dmg.wav")
+    enemy_hit_sound.set_volume(0.3)
+
     clock = pygame.time.Clock()
     bear = Bear(width // 2, height // 2)
     all_sprites = pygame.sprite.Group(bear)
@@ -426,11 +436,13 @@ def run_game(screen):
 
         collected = pygame.sprite.spritecollide(bear, powerups, True)
         for powerup in collected:
+            powerup_pick_sound.play()
             powerup_effect(bear, powerup.type)
 
         for shot in shots:
             hit_enemies = pygame.sprite.spritecollide(shot, enemies, False)
             for enemy in hit_enemies:
+                enemy_hit_sound.play()
                 damage = 2 if bear.double_damage else 1
                 enemy.hp -= damage
                 shot.kill()
@@ -444,6 +456,7 @@ def run_game(screen):
         damage_enemies = pygame.sprite.spritecollide(bear, enemies, False)
         for enemy in damage_enemies:
             if invulnerability_timer <= 0 and not bear.invincible:
+                bear_hit_sound.play()
                 bear.hp -= enemy.damage
                 invulnerability_timer = 1000
                 if bear.hp <= 0:

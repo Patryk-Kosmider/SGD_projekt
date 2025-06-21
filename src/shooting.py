@@ -2,8 +2,12 @@ import math
 
 import pygame
 
+pygame.mixer.init()
 
 class Shooting(pygame.sprite.Sprite):
+    shot_sound = pygame.mixer.Sound("../assets/ak47.wav")
+    shot_sound.set_volume(0.1)
+
     def __init__(self, x, y, target_x, target_y, angle_offset=0):
         super().__init__()
         self.og_image = pygame.Surface((10, 6), pygame.SRCALPHA)
@@ -23,6 +27,8 @@ class Shooting(pygame.sprite.Sprite):
         rot_angle = -math.degrees(angle_with_offset)
         self.image = pygame.transform.rotate(self.og_image, rot_angle)
         self.rect = self.image.get_rect(center=(x, y))
+
+        self.shot_sound.play()
 
     def update(self):
         self.rect.x += self.velocity[0]
