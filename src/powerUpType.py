@@ -7,7 +7,7 @@ class PowerType(enum.Enum):
         "image": "../assets/3xshoot.png",
         "duration": 10000,
         "instant": False,
-        "base_chance": 0.05,
+        "base_chance": 0.02,
     }
 
     INVINCIBLE = {
@@ -21,7 +21,7 @@ class PowerType(enum.Enum):
         "image": "../assets/2xdmg.png",
         "duration": 8000,
         "instant": False,
-        "base_chance": 0.05,
+        "base_chance": 0.02,
     }
 
-    HEAL = {"image": "../assets/heal.png", "instant": True, "base_chance": 0.07}
+    HEAL = {"image": "../assets/heal.png", "instant": True, "base_chance": 0.05}

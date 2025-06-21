@@ -31,6 +31,6 @@ class EnemyType(enum.Enum):
         "image": "../assets/enemy_4.png",
         "speed": 0.5,
         "hp": 5,
-        "damage": 3,
+        "damage": 2,
         "points": 60,
     }

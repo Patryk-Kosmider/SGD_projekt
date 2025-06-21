@@ -409,7 +409,7 @@ def run_game(screen):
 
         if spawn_timer >= spawn_interval:
             spawn_timer = 0
-            mobs_per_wave = 5 + wave * 2
+            mobs_per_wave = 7 + wave * 2
             for _ in range(mobs_per_wave):
                 side = random.choice(["l", "r", "u", "d"])
                 if side == "l":
